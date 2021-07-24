@@ -42,19 +42,14 @@ $ MIX_ENV=prod mix compile
 
 ## Compiling your application assets
 
-This step is required only if you have static assets like images, JavaScript, stylesheets and more in your Phoenix applications. By default, Phoenix uses webpack, and that's what we are going to explore.
-
-Compilation of static assets happens in two steps:
+This step is required only if you have compilable assets like JavaScript and stylesheets. By default, Phoenix uses `esbuild` but everything is encapsulated in a single `mix assets.deploy` task defined in your `mix.exs`:
 
 ```console
-$ npm run deploy --prefix ./assets
-$ MIX_ENV=prod mix phx.digest
+$ MIX_ENV=prod mix assets.deploy
 Check your digested files at "priv/static".
 ```
 
-*Note:* the `--prefix` flag on `npm` may not work on Windows. If so, replace the first command by `cd assets && npm run deploy && cd ..`.
-
-And that is it! The first command builds the assets and the second generates digests as well as a cache manifest file so Phoenix can quickly serve assets in production.
+And that is it! The Mix task by default builds the assets and then generates digests with a cache manifest file so Phoenix can quickly serve assets in production.
 
 Keep in mind that, if you by any chance forget to run the steps above, Phoenix will show an error message:
 
@@ -116,6 +111,7 @@ And that's it. Next you can use one of our official guides to deploy:
 
   * [with Elixir's releases](releases.html)
   * [to Gigalixir](gigalixir.html), an Elixir-centric Platform as a Service (PaaS)
+  * [to Fly.io](fly.html), a PaaS that deploys your servers close to your users with built-in distribution support
   * and [to Heroku](heroku.html), one of the most popular PaaS.
 
 ## Community Deployment Guides

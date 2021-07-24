@@ -272,9 +272,9 @@ Remember to update your repository by running migrations:
 
 A more complete walk-through of how to get started with this generator is available in the [`mix phx.gen.auth` authentication guide](mix_phx_gen_auth.html).
 
-### `mix phx.gen.channel`
+### `mix phx.gen.channel` and `mix phx.gen.socket`
 
-This task will generate a basic Phoenix channel as well a test case for it. It takes the module name for the channel as the only one argument:
+This task will generate a basic Phoenix channel, the socket to power the channel (if you haven't created one yet), as well a test case for it. It takes the module name for the channel as the only one argument:
 
 ```console
 $ mix phx.gen.channel Room
@@ -282,13 +282,40 @@ $ mix phx.gen.channel Room
 * creating test/hello_web/channels/room_channel_test.exs
 ```
 
-When `mix phx.gen.channel` is done, it helpfully tells us that we need to add a channel route to our router file.
+If your application does not have a `UserSocket` yet, it will ask if you want to create one:
+
+```console
+The default socket handler - HelloWeb.UserSocket - was not found
+in its default location.
+
+Do you want to create it? [Y/n]
+```
+
+By pressing confirming, a channel will be created, then you need to connect the socket in your endpoint:
+
+```console
+Add the socket handler to your `lib/hello_web/endpoint.ex`, for example:
+
+    socket "/socket", HelloWeb.UserSocket,
+      websocket: true,
+      longpoll: false
+
+For the front-end integration, you need to import the `user_socket.js`
+in your `assets/js/app.js` file:
+
+    import "./#{binding[:path]}_socket.js"
+
+```
+
+In case a `UserSocket` already exists or you decide to not create one, the `channel` generator will tell you to add it to the Socket manually:
 
 ```console
 Add the channel to your `lib/hello_web/channels/user_socket.ex` handler, for example:
 
     channel "rooms:lobby", HelloWeb.RoomChannel
 ```
+
+You can also create a socket any time by invoking `mix phx.gen.socket`.
 
 ### `mix phx.gen.presence`
 
@@ -362,7 +389,7 @@ And then `assets/` which should look similar to this:
 
 ```console
 ├── css
-│   └── app.scss
+│   └── app.css
 ├── js
 │   └── app.js
 └── vendor
@@ -513,13 +540,9 @@ $ mix ecto.gen.repo -r OurCustom.Repo
 * creating lib/our_custom/repo.ex
 * updating config/config.exs
 Don't forget to add your new repo to your supervision tree
-(typically in lib/hello.ex):
+(typically in lib/hello/application.ex):
 
-    children = [
-      ...,
-      OurCustom.Repo,
-      ...
-    ]
+    {OurCustom.Repo, []}
 ```
 
 Notice that this task has updated `config/config.exs`. If we take a look, we'll see this extra configuration block for our new repo.
@@ -536,7 +559,7 @@ config :hello, OurCustom.Repo,
 
 Of course, we'll need to change the login credentials to match what our database expects. We'll also need to change the config for other environments.
 
-We certainly should follow the instructions and add our new repo to our supervision tree. In our `Hello` application, we would open up `lib/hello.ex`, and add our repo as a worker to the `children` list.
+We certainly should follow the instructions and add our new repo to our supervision tree. In our `Hello` application, we would open up `lib/hello/application.ex`, and add our repo as a worker to the `children` list.
 
 ```elixir
 . . .
@@ -749,7 +772,7 @@ If you want to make your new Mix task to use your application's infrastructure, 
   def run(_args) do
     Mix.Task.run("app.start")
     Mix.shell().info("Now I have access to Repo and other goodies!")
-    Mix.shell().info("Greetings from the Hello Phoenix Application!")    
+    Mix.shell().info("Greetings from the Hello Phoenix Application!")
   end
 ```
 
